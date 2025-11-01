@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Bill Splitter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step-header h2 {
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .person-item, .item-entry {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .person-item input, .item-entry input {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 8px 16px;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-add {
+            background: #17a2b8;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .btn-add:hover {
+            background: #138496;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .summary h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-item.total {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #667eea;
+            border-top: 2px solid #667eea;
+            margin-top: 10px;
+            padding-top: 15px;
+        }
+
+        .person-summary {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .person-summary h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .item-list {
+            margin: 10px 0;
+        }
+
+        .item-list-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            color: #555;
+        }
+
+        .overall-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        .overall-summary h3 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .overall-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .overall-total {
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            margin-top: 15px;
+            padding-top: 15px;
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Restaurant Bill Splitter</h1>
+            <p>Split bills fairly and easily among friends</p>
+        </div>
+
+        <div class="content">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+
+            <!-- Step 1: People -->
+            <div class="step active" id="step1">
+                <div class="step-header">
+                    <h2>Step 1: Who's splitting the bill?</h2>
+                </div>
+                <div class="form-group">
+                    <label for="numPeople">Number of people:</label>
+                    <input type="number" id="numPeople" min="1" value="2">
+                </div>
+                <div id="peopleContainer"></div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="goToStep2()">Next: Add Items →</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Individual Items -->
+            <div class="step" id="step2">
+                <div class="step-header">
+                    <h2>Step 2: Individual Items</h2>
+                </div>
+                <div id="individualItemsContainer"></div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+                    <button class="btn btn-primary" onclick="goToStep3()">Next: Shared Items →</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Shared Items -->
+            <div class="step" id="step3">
+                <div class="step-header">
+                    <h2>Step 3: Shared Items</h2>
+                </div>
+                <div id="sharedItemsContainer"></div>
+                <button class="btn btn-add" onclick="addSharedItem()">+ Add Shared Item</button>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
+                    <button class="btn btn-primary" onclick="goToStep4()">Next: Charges & Taxes →</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Charges & Taxes -->
+            <div class="step" id="step4">
+                <div class="step-header">
+                    <h2>Step 4: Service Charge, GST & Tip</h2>
+                </div>
+                <div class="form-group">
+                    <label for="serviceCharge">Service Charge (%):</label>
+                    <input type="number" id="serviceCharge" min="0" step="0.1" value="10">
+                    <small style="color: #666; display: block; margin-top: 5px;">Common in restaurants (usually 10%)</small>
+                </div>
+                <div class="form-group">
+                    <label for="gstRate">GST / Sales Tax (%):</label>
+                    <input type="number" id="gstRate" min="0" step="0.1" value="9">
+                    <small style="color: #666; display: block; margin-top: 5px;">Goods and Services Tax (9% in Singapore)</small>
+                </div>
+                <div class="form-group">
+                    <label for="tipRate">Tip (%):</label>
+                    <input type="number" id="tipRate" min="0" step="0.1" value="0">
+                    <small style="color: #666; display: block; margin-top: 5px;">Optional gratuity (0% if service charge included)</small>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
+                    <button class="btn btn-success" onclick="calculateBill()">Calculate Bill 🧮</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Results -->
+            <div class="step" id="step5">
+                <div class="step-header">
+                    <h2>Bill Summary</h2>
+                </div>
+                <div id="resultsContainer"></div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="goToStep(1)">Start New Bill</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let billData = {
+            people: [],
+            orders: {},
+            sharedItems: [],
+            serviceCharge: 10,
+            gstRate: 9,
+            tipRate: 0
+        };
+
+        // Initialize
+        document.getElementById('numPeople').addEventListener('input', generatePeopleInputs);
+        generatePeopleInputs();
+
+        function generatePeopleInputs() {
+            const num = parseInt(document.getElementById('numPeople').value) || 0;
+            const container = document.getElementById('peopleContainer');
+            container.innerHTML = '';
+
+            for (let i = 0; i < num; i++) {
+                const div = document.createElement('div');
+                div.className = 'person-item';
+                div.innerHTML = `
+                    <input type="text" placeholder="Person ${i + 1} name" id="person${i}" value="${billData.people[i] || ''}">
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function goToStep(stepNum) {
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            document.getElementById(`step${stepNum}`).classList.add('active');
+            updateProgress(stepNum);
+        }
+
+        function updateProgress(step) {
+            const progress = (step / 5) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function goToStep2() {
+            // Collect people names
+            const num = parseInt(document.getElementById('numPeople').value) || 0;
+            billData.people = [];
+            
+            for (let i = 0; i < num; i++) {
+                const name = document.getElementById(`person${i}`).value.trim();
+                if (!name) {
+                    alert(`Please enter a name for Person ${i + 1}`);
+                    return;
+                }
+                billData.people.push(name);
+            }
+
+            // Initialize orders
+            billData.orders = {};
+            billData.people.forEach(person => {
+                billData.orders[person] = [];
+            });
+
+            generateIndividualItemsInputs();
+            goToStep(2);
+        }
+
+        function generateIndividualItemsInputs() {
+            const container = document.getElementById('individualItemsContainer');
+            container.innerHTML = '';
+
+            billData.people.forEach(person => {
+                const personDiv = document.createElement('div');
+                personDiv.className = 'summary';
+                personDiv.innerHTML = `
+                    <h3>${person}'s Items</h3>
+                    <div id="items-${person}"></div>
+                    <button class="btn btn-add" onclick="addPersonItem('${person}')">+ Add Item</button>
+                `;
+                container.appendChild(personDiv);
+            });
+        }
+
+        function addPersonItem(person) {
+            const container = document.getElementById(`items-${person}`);
+            const index = container.children.length;
+            
+            const div = document.createElement('div');
+            div.className = 'item-entry';
+            div.innerHTML = `
+                <input type="text" placeholder="Item name" id="item-name-${person}-${index}">
+                <input type="number" placeholder="Price" step="0.01" min="0" id="item-price-${person}-${index}">
+                <button class="btn btn-danger" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function goToStep3() {
+            // Collect individual items
+            billData.people.forEach(person => {
+                billData.orders[person] = [];
+                const container = document.getElementById(`items-${person}`);
+                const items = container.querySelectorAll('.item-entry');
+                
+                items.forEach((item, index) => {
+                    const name = document.getElementById(`item-name-${person}-${index}`).value.trim();
+                    const price = parseFloat(document.getElementById(`item-price-${person}-${index}`).value) || 0;
+                    
+                    if (name && price > 0) {
+                        billData.orders[person].push({ name, price });
+                    }
+                });
+            });
+
+            goToStep(3);
+        }
+
+        function addSharedItem() {
+            const container = document.getElementById('sharedItemsContainer');
+            const index = container.children.length;
+            
+            const div = document.createElement('div');
+            div.className = 'item-entry';
+            div.innerHTML = `
+                <input type="text" placeholder="Shared item name" id="shared-name-${index}">
+                <input type="number" placeholder="Price" step="0.01" min="0" id="shared-price-${index}">
+                <button class="btn btn-danger" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function goToStep4() {
+            // Collect shared items
+            billData.sharedItems = [];
+            const container = document.getElementById('sharedItemsContainer');
+            const items = container.querySelectorAll('.item-entry');
+            
+            items.forEach((item, index) => {
+                const name = document.getElementById(`shared-name-${index}`).value.trim();
+                const price = parseFloat(document.getElementById(`shared-price-${index}`).value) || 0;
+                
+                if (name && price > 0) {
+                    billData.sharedItems.push({ name, price });
+                }
+            });
+
+            goToStep(4);
+        }
+
+        function calculateBill() {
+            billData.serviceCharge = parseFloat(document.getElementById('serviceCharge').value) || 0;
+            billData.gstRate = parseFloat(document.getElementById('gstRate').value) || 0;
+            billData.tipRate = parseFloat(document.getElementById('tipRate').value) || 0;
+
+            const numPeople = billData.people.length;
+            
+            // Calculate totals
+            const individualTotals = {};
+            billData.people.forEach(person => {
+                individualTotals[person] = billData.orders[person].reduce((sum, item) => sum + item.price, 0);
+            });
+
+            const totalShared = billData.sharedItems.reduce((sum, item) => sum + item.price, 0);
+            const sharedPerPerson = totalShared / numPeople;
+
+            // Subtotal (before any charges)
+            const subtotal = Object.values(individualTotals).reduce((a, b) => a + b, 0) + totalShared;
+            
+            // Service charge (applied to subtotal)
+            const serviceChargeAmount = subtotal * (billData.serviceCharge / 100);
+            const serviceChargePerPerson = serviceChargeAmount / numPeople;
+            
+            // GST (applied to subtotal + service charge)
+            const amountBeforeGST = subtotal + serviceChargeAmount;
+            const gstAmount = amountBeforeGST * (billData.gstRate / 100);
+            const gstPerPerson = gstAmount / numPeople;
+
+            // Tip (applied to subtotal + service charge + GST)
+            const totalBeforeTip = amountBeforeGST + gstAmount;
+            const tipAmount = totalBeforeTip * (billData.tipRate / 100);
+            const tipPerPerson = tipAmount / numPeople;
+
+            const grandTotal = totalBeforeTip + tipAmount;
+
+            displayResults(individualTotals, sharedPerPerson, serviceChargePerPerson, gstPerPerson, tipPerPerson, subtotal, serviceChargeAmount, gstAmount, tipAmount, grandTotal);
+            goToStep(5);
+        }
+
+        function displayResults(individualTotals, sharedPerPerson, serviceChargePerPerson, gstPerPerson, tipPerPerson, subtotal, serviceChargeAmount, gstAmount, tipAmount, grandTotal) {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = '';
+
+            billData.people.forEach(person => {
+                const personDiv = document.createElement('div');
+                personDiv.className = 'person-summary';
+
+                let itemsHTML = '';
+                if (billData.orders[person].length > 0) {
+                    itemsHTML = '<div class="item-list"><strong>Individual Items:</strong>';
+                    billData.orders[person].forEach(item => {
+                        itemsHTML += `<div class="item-list-item"><span>${item.name}</span><span>${item.price.toFixed(2)}</span></div>`;
+                    });
+                    itemsHTML += `<div class="item-list-item" style="font-weight: 600;"><span>Subtotal:</span><span>${individualTotals[person].toFixed(2)}</span></div></div>`;
+                }
+
+                let sharedHTML = '';
+                if (billData.sharedItems.length > 0) {
+                    sharedHTML = '<div class="item-list"><strong>Shared Items:</strong>';
+                    billData.sharedItems.forEach(item => {
+                        const split = item.price / billData.people.length;
+                        sharedHTML += `<div class="item-list-item"><span>${item.name}</span><span>${split.toFixed(2)}</span></div>`;
+                    });
+                    sharedHTML += `<div class="item-list-item" style="font-weight: 600;"><span>Shared Subtotal:</span><span>${sharedPerPerson.toFixed(2)}</span></div></div>`;
+                }
+
+                const personTotal = individualTotals[person] + sharedPerPerson + serviceChargePerPerson + gstPerPerson + tipPerPerson;
+
+                let chargesHTML = '';
+                if (billData.serviceCharge > 0) {
+                    chargesHTML += `
+                        <div class="summary-item">
+                            <span>Service Charge (${billData.serviceCharge}%):</span>
+                            <span>${serviceChargePerPerson.toFixed(2)}</span>
+                        </div>
+                    `;
+                }
+                if (billData.gstRate > 0) {
+                    chargesHTML += `
+                        <div class="summary-item">
+                            <span>GST (${billData.gstRate}%):</span>
+                            <span>${gstPerPerson.toFixed(2)}</span>
+                        </div>
+                    `;
+                }
+                if (billData.tipRate > 0) {
+                    chargesHTML += `
+                        <div class="summary-item">
+                            <span>Tip (${billData.tipRate}%):</span>
+                            <span>${tipPerPerson.toFixed(2)}</span>
+                        </div>
+                    `;
+                }
+
+                personDiv.innerHTML = `
+                    <h4>${person}</h4>
+                    ${itemsHTML}
+                    ${sharedHTML}
+                    ${chargesHTML}
+                    <div class="summary-item total">
+                        <span>TOTAL TO PAY:</span>
+                        <span>${personTotal.toFixed(2)}</span>
+                    </div>
+                `;
+                container.appendChild(personDiv);
+            });
+
+            const overallDiv = document.createElement('div');
+            overallDiv.className = 'overall-summary';
+            
+            let overallChargesHTML = '';
+            if (billData.serviceCharge > 0) {
+                overallChargesHTML += `
+                    <div class="overall-item">
+                        <span>Service Charge (${billData.serviceCharge}%):</span>
+                        <span>${serviceChargeAmount.toFixed(2)}</span>
+                    </div>
+                `;
+            }
+            if (billData.gstRate > 0) {
+                overallChargesHTML += `
+                    <div class="overall-item">
+                        <span>GST (${billData.gstRate}%):</span>
+                        <span>${gstAmount.toFixed(2)}</span>
+                    </div>
+                `;
+            }
+            if (billData.tipRate > 0) {
+                overallChargesHTML += `
+                    <div class="overall-item">
+                        <span>Tip (${billData.tipRate}%):</span>
+                        <span>${tipAmount.toFixed(2)}</span>
+                    </div>
+                `;
+            }
+            
+            overallDiv.innerHTML = `
+                <h3>Overall Summary</h3>
+                <div class="overall-item">
+                    <span>Subtotal (all items):</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                </div>
+                ${overallChargesHTML}
+                <div class="overall-item overall-total">
+                    <span>GRAND TOTAL:</span>
+                    <span>${grandTotal.toFixed(2)}</span>
+                </div>
+            `;
+            container.appendChild(overallDiv);
+        }
+    </script>
+</body>
+</html>
